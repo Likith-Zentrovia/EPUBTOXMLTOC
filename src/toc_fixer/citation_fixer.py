@@ -4,7 +4,9 @@ Citation Fixer module for converting citation tags to proper ulink format.
 Converts:
     <citation>ch0011-c1-bib-0001</citation>
 To:
-    <ulink url="ch0011#ch0011-c1-bib-0001">1</ulink>
+    <ulink url="ch0011#ch0011s009000-5">1</ulink>
+
+The link points to the References section of the chapter, not individual entries.
 """
 
 import re
@@ -60,6 +62,9 @@ class CitationFixer:
         # Extract chapter from filename if available
         default_chapter = self._extract_chapter_from_filename(filename)
         
+        # Find the References section ID in this content
+        references_section_id = self._find_references_section_id(content, default_chapter)
+        
         def replace_citation(match):
             citation_id = match.group(1).strip()
             original = match.group(0)
@@ -67,15 +72,19 @@ class CitationFixer:
             # Parse the citation ID to extract chapter and bib number
             chapter, bib_num = self._parse_citation_id(citation_id, default_chapter)
             
-            # Keep the original citation ID for the URL - it matches the listitem id
-            # e.g., ch0011-c1-bib-0001 stays as ch0011-c1-bib-0001
-            ref_id = citation_id
-            
-            # Create the ulink - URL points to chapter file with citation ID as fragment
-            if chapter:
-                url = f"{chapter}#{ref_id}"
+            # Use the References section ID for the link target
+            # All citations in a chapter link to that chapter's References section
+            if references_section_id:
+                ref_target = references_section_id
             else:
-                url = f"#{ref_id}"
+                # Fallback: construct a default references section ID
+                ref_target = f"{chapter}s009000-5" if chapter else citation_id
+            
+            # Create the ulink - URL points to chapter's References section
+            if chapter:
+                url = f"{chapter}#{ref_target}"
+            else:
+                url = f"#{ref_target}"
             
             # Display number (strip leading zeros for display)
             display_num = str(int(bib_num)) if bib_num and bib_num.isdigit() else bib_num or citation_id
@@ -86,7 +95,7 @@ class CitationFixer:
                 'original': original,
                 'replacement': replacement,
                 'citation_id': citation_id,
-                'ref_id': ref_id,
+                'ref_target': ref_target,
                 'chapter': chapter,
                 'bib_num': bib_num
             })
@@ -96,6 +105,57 @@ class CitationFixer:
         fixed_content = self.citation_pattern.sub(replace_citation, content)
         
         return fixed_content, changes
+    
+    def _find_references_section_id(self, content: str, chapter: Optional[str]) -> Optional[str]:
+        """
+        Find the References section ID in the content.
+        
+        Looks for patterns like:
+        - <sect2 id="ch0011s009000-5"><title>References</title>
+        - <section id="..."><title>References</title>
+        - <bibliography id="...">
+        
+        Returns the section ID if found.
+        """
+        # Pattern to find section with References title
+        patterns = [
+            # sect1, sect2, sect3, etc. with References title
+            re.compile(
+                r'<sect\d[^>]*\s+id\s*=\s*["\']([^"\']+)["\'][^>]*>[\s\S]*?<title[^>]*>\s*References\s*</title>',
+                re.IGNORECASE
+            ),
+            # Generic section with References title
+            re.compile(
+                r'<section[^>]*\s+id\s*=\s*["\']([^"\']+)["\'][^>]*>[\s\S]*?<title[^>]*>\s*References\s*</title>',
+                re.IGNORECASE
+            ),
+            # bibliography element
+            re.compile(
+                r'<bibliography[^>]*\s+id\s*=\s*["\']([^"\']+)["\']',
+                re.IGNORECASE
+            ),
+            # div with References title
+            re.compile(
+                r'<div[^>]*\s+id\s*=\s*["\']([^"\']+)["\'][^>]*>[\s\S]*?<[^>]*>\s*References\s*</',
+                re.IGNORECASE
+            ),
+        ]
+        
+        for pattern in patterns:
+            match = pattern.search(content)
+            if match:
+                return match.group(1)
+        
+        # Try to find by looking for "References" heading and backtracking to find ID
+        ref_title_match = re.search(
+            r'<(sect\d|section|div)[^>]*id\s*=\s*["\']([^"\']+)["\'][^>]*>[\s\S]{0,500}?References',
+            content,
+            re.IGNORECASE
+        )
+        if ref_title_match:
+            return ref_title_match.group(2)
+        
+        return None
     
     def _extract_chapter_from_filename(self, filename: str) -> Optional[str]:
         """Extract chapter identifier from filename."""

@@ -25,8 +25,8 @@ class TestCitationFixer(unittest.TestCase):
         fixed, changes = self.fixer.fix_citations_in_content(content)
         
         self.assertEqual(len(changes), 1)
-        # Citation ID is kept as-is to match listitem id in bibliography
-        self.assertIn('<ulink url="ch0011#ch0011-c1-bib-0001">1</ulink>', fixed)
+        # Citation links to chapter's References section (default fallback pattern)
+        self.assertIn('<ulink url="ch0011#ch0011s009000-5">1</ulink>', fixed)
         self.assertNotIn('<citation>', fixed)
     
     def test_multiple_citations(self):
@@ -69,6 +69,27 @@ class TestCitationFixer(unittest.TestCase):
         self.assertIn('<ulink url="ch0020">Chapter 9</ulink>', fixed)
         # Para tag should be preserved
         self.assertIn('id="ch0011-c1-para-0005"', fixed)
+    
+    def test_citation_with_references_section(self):
+        """Test citation fix when References section exists in content."""
+        content = '''
+        <chapter>
+            <para>Some text <citation>ch0011-c1-bib-0001</citation>.</para>
+            <sect2 id="ch0011s009000-5">
+                <title>References</title>
+                <orderedlist>
+                    <listitem id="ch0011-c1-bib-0001">
+                        <para>Reference 1 content</para>
+                    </listitem>
+                </orderedlist>
+            </sect2>
+        </chapter>
+        '''
+        fixed, changes = self.fixer.fix_citations_in_content(content, 'ch0011.xml')
+        
+        self.assertEqual(len(changes), 1)
+        # Should link to the References section ID found in content
+        self.assertIn('url="ch0011#ch0011s009000-5"', fixed)
     
     def test_analyze_citations(self):
         """Test analyzing citations without fixing."""
