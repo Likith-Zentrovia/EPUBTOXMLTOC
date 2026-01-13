@@ -16,9 +16,10 @@ from .nesting_fixer import NestingFixer
 from .link_fixer import LinkFixer
 from .citation_fixer import CitationFixer
 from .reference_fixer import ReferenceFixer
+from .bibliography_fixer import BibliographyFixer
 from .book_fixer import BookFixer
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __all__ = [
     "TOCFixer", 
     "NCXParser", 
@@ -27,5 +28,6 @@ __all__ = [
     "LinkFixer",
     "CitationFixer",
     "ReferenceFixer",
+    "BibliographyFixer",
     "BookFixer",
 ]

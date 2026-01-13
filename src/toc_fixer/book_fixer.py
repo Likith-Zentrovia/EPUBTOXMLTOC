@@ -19,6 +19,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from .toc_fixer import TOCFixer
 from .citation_fixer import CitationFixer
 from .reference_fixer import ReferenceFixer
+from .bibliography_fixer import BibliographyFixer
 
 
 class BookFixer:
@@ -51,7 +52,7 @@ class BookFixer:
         r'\.git',
     ]
     
-    def __init__(self, fix_toc: bool = True, fix_citations: bool = True, fix_references: bool = True):
+    def __init__(self, fix_toc: bool = True, fix_citations: bool = True, fix_references: bool = True, fix_bibliography: bool = True):
         """
         Initialize the Book Fixer.
         
@@ -59,13 +60,16 @@ class BookFixer:
             fix_toc: Whether to fix TOC XML files.
             fix_citations: Whether to fix citation tags in content files.
             fix_references: Whether to fix bibliography reference IDs.
+            fix_bibliography: Whether to fix bibliography structure (orderedlist to bibliography).
         """
         self.fix_toc = fix_toc
         self.fix_citations = fix_citations
         self.fix_references = fix_references
+        self.fix_bibliography = fix_bibliography
         self.toc_fixer = TOCFixer()
         self.citation_fixer = CitationFixer()
         self.reference_fixer = ReferenceFixer()
+        self.bibliography_fixer = BibliographyFixer()
         
         # Compile patterns
         self.toc_re = [re.compile(p, re.IGNORECASE) for p in self.TOC_PATTERNS]
@@ -93,10 +97,12 @@ class BookFixer:
             'toc_files': [],
             'content_files': [],
             'reference_files': [],
+            'bibliography_files': [],
             'errors': [],
             'total_citations_fixed': 0,
             'total_nesting_issues_fixed': 0,
             'total_references_fixed': 0,
+            'total_bibliography_fixed': 0,
         }
         
         # Create temp directory for extraction
@@ -140,10 +146,12 @@ class BookFixer:
             'toc_files': [],
             'content_files': [],
             'reference_files': [],
+            'bibliography_files': [],
             'errors': [],
             'total_citations_fixed': 0,
             'total_nesting_issues_fixed': 0,
             'total_references_fixed': 0,
+            'total_bibliography_fixed': 0,
         }
         
         # If output_dir is different, copy first
@@ -260,7 +268,7 @@ class BookFixer:
             report['errors'].append(f"TOC error in {rel_path}: {str(e)}")
     
     def _process_content_file(self, file_path: str, rel_path: str, report: Dict[str, Any]):
-        """Process a content file to fix citations and references."""
+        """Process a content file to fix citations, references, and bibliography structure."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -268,6 +276,20 @@ class BookFixer:
             modified = False
             citations_fixed = 0
             references_fixed = 0
+            bibliography_fixed = 0
+            
+            # Fix bibliography structure first (orderedlist -> bibliography)
+            # This should be done before citation fixing
+            if self.fix_bibliography and '<orderedlist' in content.lower() and 'references' in content.lower():
+                content, bib_changes = self.bibliography_fixer.fix_bibliography_structure(content, file_path)
+                if bib_changes:
+                    bibliography_fixed = sum(c.get('entries_converted', 0) for c in bib_changes)
+                    modified = True
+                    report['bibliography_files'].append({
+                        'file': rel_path,
+                        'entries_converted': bibliography_fixed,
+                    })
+                    report['total_bibliography_fixed'] += bibliography_fixed
             
             # Fix citations if present
             if self.fix_citations and '<citation>' in content.lower():
@@ -402,9 +424,17 @@ def print_report(report: Dict[str, Any]):
         print(f"  {cf['file']}: {cf.get('citations_fixed', 0)} citations fixed")
     print()
     
+    # Bibliography structure files
+    bibliography_files = report.get('bibliography_files', [])
+    print(f"Bibliography Structure Fixed: {len(bibliography_files)}")
+    print("-" * 50)
+    for bf in bibliography_files:
+        print(f"  {bf['file']}: {bf.get('entries_converted', 0)} entries converted")
+    print()
+    
     # Reference files
     reference_files = report.get('reference_files', [])
-    print(f"Reference/Bibliography Files Fixed: {len(reference_files)}")
+    print(f"Reference IDs Fixed: {len(reference_files)}")
     print("-" * 50)
     for rf in reference_files:
         print(f"  {rf['file']}: {rf.get('references_fixed', 0)} reference IDs fixed")
@@ -415,6 +445,7 @@ def print_report(report: Dict[str, Any]):
     print("-" * 50)
     print(f"  Total nesting issues fixed: {report.get('total_nesting_issues_fixed', 0)}")
     print(f"  Total citations fixed: {report.get('total_citations_fixed', 0)}")
+    print(f"  Total bibliography entries converted: {report.get('total_bibliography_fixed', 0)}")
     print(f"  Total reference IDs fixed: {report.get('total_references_fixed', 0)}")
     
     # Errors
