@@ -26,7 +26,7 @@ cd EPUBTOXMLTOC
 pip install lxml
 
 # Run directly using the convenience script
-python fix_toc.py input.ncx -o output.ncx
+python fix_toc.py input.xml -o output.xml
 ```
 
 ### Option 2: Full Installation
@@ -43,7 +43,7 @@ pip install -r requirements.txt
 pip install -e .
 
 # Now you can use toc-fixer from anywhere
-toc-fixer input.ncx -o output.ncx
+toc-fixer input.xml -o output.xml
 ```
 
 ### Requirements
@@ -57,22 +57,22 @@ toc-fixer input.ncx -o output.ncx
 
 ```bash
 # Fix a TOC file and save to new file
-python fix_toc.py input.ncx -o output.ncx
+python fix_toc.py input.xml -o output.xml
 
 # Fix a TOC file in place
-python fix_toc.py input.ncx --in-place
+python fix_toc.py input.xml --in-place
 
 # Analyze issues without fixing
-python fix_toc.py input.ncx --analyze
+python fix_toc.py input.xml --analyze
 
 # Analyze with JSON output
-python fix_toc.py input.ncx --analyze --json
+python fix_toc.py input.xml --analyze --json
 
 # Fix with content path for link validation
-python fix_toc.py toc.ncx -o fixed.ncx --content-path ./OEBPS
+python fix_toc.py toc.xml -o fixed.xml --content-path ./OEBPS
 
 # Verbose output
-python fix_toc.py input.ncx -o output.ncx -v
+python fix_toc.py input.xml -o output.xml -v
 ```
 
 ### Windows Examples
@@ -82,7 +82,7 @@ python fix_toc.py input.ncx -o output.ncx -v
 python fix_toc.py "C:\Users\user\Documents\book\toc.xml" -o "C:\Users\user\Documents\book\toc_fixed.xml"
 
 # Analyze a TOC file
-python fix_toc.py "C:\path\to\toc.ncx" --analyze -v
+python fix_toc.py "C:\path\to\toc.xml" --analyze -v
 ```
 
 ### Python API Usage
