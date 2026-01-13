@@ -15,7 +15,21 @@ A Python tool to fix nesting and link issues in Table of Contents (TOC) XML file
 
 ## Installation
 
-### From Source
+### Option 1: Quick Start (No Installation Required)
+
+```bash
+# Clone the repository
+git clone https://github.com/Likith-Zentrovia/EPUBTOXMLTOC.git
+cd EPUBTOXMLTOC
+
+# Install the required dependency
+pip install lxml
+
+# Run directly using the convenience script
+python fix_toc.py input.ncx -o output.ncx
+```
+
+### Option 2: Full Installation
 
 ```bash
 # Clone the repository
@@ -25,8 +39,11 @@ cd EPUBTOXMLTOC
 # Install dependencies
 pip install -r requirements.txt
 
-# Install the package
+# Install the package (in development mode)
 pip install -e .
+
+# Now you can use toc-fixer from anywhere
+toc-fixer input.ncx -o output.ncx
 ```
 
 ### Requirements
@@ -36,26 +53,36 @@ pip install -e .
 
 ## Quick Start
 
-### Command Line Usage
+### Command Line Usage (Using fix_toc.py)
 
 ```bash
 # Fix a TOC file and save to new file
-toc-fixer input.ncx -o output.ncx
+python fix_toc.py input.ncx -o output.ncx
 
 # Fix a TOC file in place
-toc-fixer input.ncx --in-place
+python fix_toc.py input.ncx --in-place
 
 # Analyze issues without fixing
-toc-fixer input.ncx --analyze
+python fix_toc.py input.ncx --analyze
 
 # Analyze with JSON output
-toc-fixer input.ncx --analyze --json
+python fix_toc.py input.ncx --analyze --json
 
 # Fix with content path for link validation
-toc-fixer toc.ncx -o fixed.ncx --content-path ./OEBPS
+python fix_toc.py toc.ncx -o fixed.ncx --content-path ./OEBPS
 
 # Verbose output
-toc-fixer input.ncx -o output.ncx -v
+python fix_toc.py input.ncx -o output.ncx -v
+```
+
+### Windows Examples
+
+```powershell
+# From the EPUBTOXMLTOC directory:
+python fix_toc.py "C:\Users\user\Documents\book\toc.xml" -o "C:\Users\user\Documents\book\toc_fixed.xml"
+
+# Analyze a TOC file
+python fix_toc.py "C:\path\to\toc.ncx" --analyze -v
 ```
 
 ### Python API Usage
