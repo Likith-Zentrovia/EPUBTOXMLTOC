@@ -280,7 +280,11 @@ class NavParser:
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
         doctype = '<!DOCTYPE html>\n'
         
-        body_str = etree.tostring(html, encoding='unicode', pretty_print=True)
+        body_str = etree.tostring(html, encoding='UTF-8', pretty_print=True).decode('utf-8')
+        
+        # Remove the XML declaration from body if present (we'll add our own)
+        if body_str.startswith('<?xml'):
+            body_str = body_str.split('?>', 1)[1].lstrip('\n')
         
         return xml_declaration + doctype + body_str
     

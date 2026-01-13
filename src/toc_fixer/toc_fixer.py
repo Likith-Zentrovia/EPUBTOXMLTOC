@@ -263,8 +263,14 @@ class TOCFixer:
         self._build_generic_items(items_elem, toc_structure.get('items', []))
         
         # Format output
-        return etree.tostring(root, encoding='unicode', pretty_print=True, 
-                             xml_declaration=True)
+        xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        body = etree.tostring(root, encoding='UTF-8', pretty_print=True).decode('utf-8')
+        
+        # Remove the XML declaration from body if present (we'll add our own)
+        if body.startswith('<?xml'):
+            body = body.split('?>', 1)[1].lstrip('\n')
+        
+        return xml_declaration + body
     
     def _build_generic_items(self, parent, items: List[Dict[str, Any]]):
         """Build generic XML items recursively."""
