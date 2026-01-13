@@ -246,7 +246,11 @@ class NCXParser:
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
         doctype = '<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">\n'
         
-        body = etree.tostring(root, encoding='unicode', pretty_print=True)
+        body = etree.tostring(root, encoding='UTF-8', pretty_print=True).decode('utf-8')
+        
+        # Remove the XML declaration from body if present (we'll add our own)
+        if body.startswith('<?xml'):
+            body = body.split('?>', 1)[1].lstrip('\n')
         
         return xml_declaration + doctype + body
     
