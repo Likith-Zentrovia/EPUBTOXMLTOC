@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Table of Contents</title>
+</head>
+<body>
+  <nav epub:type="toc" id="toc">
+    <h1>Table of Contents</h1>
+    
+    <!-- This EPUB 3 Nav document has nesting issues - everything is flat when it shouldn't be -->
+    <ol>
+      <li><a href="cover.xhtml">Cover</a></li>
+      <li><a href="title.xhtml">Title Page</a></li>
+      <li><a href="dedication.xhtml">Dedication</a></li>
+      
+      <!-- Part I - should contain chapters -->
+      <li><a href="part1.xhtml">Part I. Foundations</a></li>
+      
+      <!-- Chapter 1 - should be nested under Part I -->
+      <li><a href="chapter01.xhtml">Chapter 1. Introduction</a></li>
+      
+      <!-- These sections should be nested under Chapter 1 -->
+      <li><a href="chapter01.xhtml#sec1">1.1 What is This Book About?</a></li>
+      <li><a href="chapter01.xhtml#sec2">1.2 Who Should Read This?</a></li>
+      <li><a href="chapter01.xhtml#sec3">1.3 How to Use This Book</a></li>
+      
+      <!-- Chapter 2 - should be nested under Part I -->
+      <li><a href="chapter02.xhtml">Chapter 2. Getting Started</a></li>
+      
+      <!-- Sections for Chapter 2 -->
+      <li><a href="chapter02.xhtml#prerequisites">2.1 Prerequisites</a></li>
+      <li><a href="chapter02.xhtml#installation">2.2 Installation</a></li>
+      
+      <!-- Subsections - should be nested under 2.2 -->
+      <li><a href="chapter02.xhtml#windows">2.2.1 Windows Installation</a></li>
+      <li><a href="chapter02.xhtml#mac">2.2.2 macOS Installation</a></li>
+      <li><a href="chapter02.xhtml#linux">2.2.3 Linux Installation</a></li>
+      
+      <!-- Part II -->
+      <li><a href="part2.xhtml">Part II. Advanced Topics</a></li>
+      
+      <!-- Chapter 3 -->
+      <li><a href="chapter03.xhtml">Chapter 3. Deep Dive</a></li>
+      <li><a href="chapter03.xhtml#topic1">3.1 Advanced Techniques</a></li>
+      <li><a href="chapter03.xhtml#topic2">3.2 Best Practices</a></li>
+      
+      <!-- Back matter -->
+      <li><a href="appendix.xhtml">Appendix</a></li>
+      <li><a href="glossary.xhtml">Glossary</a></li>
+      <li><a href="index.xhtml">Index</a></li>
+    </ol>
+  </nav>
+</body>
+</html>

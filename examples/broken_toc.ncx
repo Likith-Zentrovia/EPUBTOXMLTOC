@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="urn:uuid:sample-book"/>
+    <meta name="dtb:depth" content="1"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>Sample Book with Broken TOC</text>
+  </docTitle>
+  <navMap>
+    <!-- This TOC has nesting and link issues that need to be fixed -->
+    
+    <!-- Front matter - should stay at level 0 -->
+    <navPoint id="cover" playOrder="1">
+      <navLabel><text>Cover</text></navLabel>
+      <content src="cover.xhtml"/>
+    </navPoint>
+    
+    <navPoint id="title" playOrder="2">
+      <navLabel><text>Title Page</text></navLabel>
+      <content src="title.xhtml"/>
+    </navPoint>
+    
+    <!-- Chapter 1 - should be at level 0 -->
+    <navPoint id="ch1" playOrder="3">
+      <navLabel><text>Chapter 1. Getting Started</text></navLabel>
+      <content src="chapter01.xhtml"/>
+    </navPoint>
+    
+    <!-- These sections should be NESTED under Chapter 1, but they're flat -->
+    <navPoint id="sec1-1" playOrder="4">
+      <navLabel><text>1.1 Introduction to the Basics</text></navLabel>
+      <content src="chapter01.xhtml#section1"/>
+    </navPoint>
+    
+    <navPoint id="sec1-2" playOrder="5">
+      <navLabel><text>1.2 Setting Up Your Environment</text></navLabel>
+      <content src="chapter01.xhtml#section2"/>
+    </navPoint>
+    
+    <!-- This subsection should be nested under 1.2 -->
+    <navPoint id="sec1-2-1" playOrder="6">
+      <navLabel><text>1.2.1 Installing Dependencies</text></navLabel>
+      <content src="chapter01.xhtml#subsection1"/>
+    </navPoint>
+    
+    <!-- Chapter 2 - should be at level 0 -->
+    <navPoint id="ch2" playOrder="7">
+      <navLabel><text>Chapter 2. Core Concepts</text></navLabel>
+      <content src="chapter02.xhtml"/>
+    </navPoint>
+    
+    <!-- These sections have BROKEN LINKS -->
+    <navPoint id="sec2-1" playOrder="8">
+      <navLabel><text>2.1 Understanding the Architecture</text></navLabel>
+      <content src="chapter02.xhtml#architecture"/>
+    </navPoint>
+    
+    <navPoint id="sec2-2" playOrder="9">
+      <navLabel><text>2.2 Working with Components</text></navLabel>
+      <!-- Broken link - wrong file name with space -->
+      <content src="chapter 02.xhtml#components"/>
+    </navPoint>
+    
+    <!-- Chapter 3 -->
+    <navPoint id="ch3" playOrder="10">
+      <navLabel><text>Chapter 3. Advanced Topics</text></navLabel>
+      <content src="chapter03.xhtml"/>
+    </navPoint>
+    
+    <!-- Section with bad URL encoding -->
+    <navPoint id="sec3-1" playOrder="11">
+      <navLabel><text>3.1 Performance Optimization</text></navLabel>
+      <content src="chapter03.xhtml#perf%optimization"/>
+    </navPoint>
+    
+    <!-- Back matter -->
+    <navPoint id="appendix" playOrder="12">
+      <navLabel><text>Appendix A. Reference Guide</text></navLabel>
+      <content src="appendix.xhtml"/>
+    </navPoint>
+    
+    <navPoint id="glossary" playOrder="13">
+      <navLabel><text>Glossary</text></navLabel>
+      <content src="glossary.xhtml"/>
+    </navPoint>
+    
+    <navPoint id="index" playOrder="14">
+      <navLabel><text>Index</text></navLabel>
+      <content src="index.xhtml"/>
+    </navPoint>
+  </navMap>
+</ncx>
