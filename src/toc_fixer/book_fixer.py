@@ -18,6 +18,7 @@ from typing import Dict, List, Any, Optional, Tuple
 
 from .toc_fixer import TOCFixer
 from .citation_fixer import CitationFixer
+from .reference_fixer import ReferenceFixer
 
 
 class BookFixer:
@@ -50,18 +51,21 @@ class BookFixer:
         r'\.git',
     ]
     
-    def __init__(self, fix_toc: bool = True, fix_citations: bool = True):
+    def __init__(self, fix_toc: bool = True, fix_citations: bool = True, fix_references: bool = True):
         """
         Initialize the Book Fixer.
         
         Args:
             fix_toc: Whether to fix TOC XML files.
             fix_citations: Whether to fix citation tags in content files.
+            fix_references: Whether to fix bibliography reference IDs.
         """
         self.fix_toc = fix_toc
         self.fix_citations = fix_citations
+        self.fix_references = fix_references
         self.toc_fixer = TOCFixer()
         self.citation_fixer = CitationFixer()
+        self.reference_fixer = ReferenceFixer()
         
         # Compile patterns
         self.toc_re = [re.compile(p, re.IGNORECASE) for p in self.TOC_PATTERNS]
@@ -88,9 +92,11 @@ class BookFixer:
             'output': output_zip,
             'toc_files': [],
             'content_files': [],
+            'reference_files': [],
             'errors': [],
             'total_citations_fixed': 0,
             'total_nesting_issues_fixed': 0,
+            'total_references_fixed': 0,
         }
         
         # Create temp directory for extraction
@@ -133,9 +139,11 @@ class BookFixer:
             'output': output_dir or input_dir,
             'toc_files': [],
             'content_files': [],
+            'reference_files': [],
             'errors': [],
             'total_citations_fixed': 0,
             'total_nesting_issues_fixed': 0,
+            'total_references_fixed': 0,
         }
         
         # If output_dir is different, copy first
@@ -252,29 +260,45 @@ class BookFixer:
             report['errors'].append(f"TOC error in {rel_path}: {str(e)}")
     
     def _process_content_file(self, file_path: str, rel_path: str, report: Dict[str, Any]):
-        """Process a content file to fix citations."""
+        """Process a content file to fix citations and references."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # Check if file has citations
-            if '<citation>' not in content.lower():
-                return
+            modified = False
+            citations_fixed = 0
+            references_fixed = 0
             
-            # Fix citations
-            fixed_content, changes = self.citation_fixer.fix_citations_in_content(content, file_path)
+            # Fix citations if present
+            if self.fix_citations and '<citation>' in content.lower():
+                content, changes = self.citation_fixer.fix_citations_in_content(content, file_path)
+                if changes:
+                    citations_fixed = len(changes)
+                    modified = True
             
-            if changes:
+            # Fix bibliography/reference IDs if present
+            if self.fix_references and ('<bibliomixed' in content.lower() or '<biblioentry' in content.lower()):
+                content, ref_changes = self.reference_fixer.fix_references_in_content(content, file_path)
+                if ref_changes:
+                    references_fixed = len(ref_changes)
+                    modified = True
+                    report['reference_files'].append({
+                        'file': rel_path,
+                        'references_fixed': references_fixed,
+                    })
+                    report['total_references_fixed'] += references_fixed
+            
+            if modified:
                 # Write back
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    f.write(fixed_content)
+                    f.write(content)
                 
-                report['content_files'].append({
-                    'file': rel_path,
-                    'citations_fixed': len(changes),
-                    'changes': changes[:5] if len(changes) > 5 else changes,  # Limit for report size
-                })
-                report['total_citations_fixed'] += len(changes)
+                if citations_fixed > 0:
+                    report['content_files'].append({
+                        'file': rel_path,
+                        'citations_fixed': citations_fixed,
+                    })
+                    report['total_citations_fixed'] += citations_fixed
                 
         except Exception as e:
             report['errors'].append(f"Content error in {rel_path}: {str(e)}")
@@ -375,7 +399,15 @@ def print_report(report: Dict[str, Any]):
     print(f"Content Files with Citations Fixed: {len(content_files)}")
     print("-" * 50)
     for cf in content_files:
-        print(f"  {cf['file']}: {cf['citations_fixed']} citations fixed")
+        print(f"  {cf['file']}: {cf.get('citations_fixed', 0)} citations fixed")
+    print()
+    
+    # Reference files
+    reference_files = report.get('reference_files', [])
+    print(f"Reference/Bibliography Files Fixed: {len(reference_files)}")
+    print("-" * 50)
+    for rf in reference_files:
+        print(f"  {rf['file']}: {rf.get('references_fixed', 0)} reference IDs fixed")
     print()
     
     # Summary
@@ -383,6 +415,7 @@ def print_report(report: Dict[str, Any]):
     print("-" * 50)
     print(f"  Total nesting issues fixed: {report.get('total_nesting_issues_fixed', 0)}")
     print(f"  Total citations fixed: {report.get('total_citations_fixed', 0)}")
+    print(f"  Total reference IDs fixed: {report.get('total_references_fixed', 0)}")
     
     # Errors
     errors = report.get('errors', [])

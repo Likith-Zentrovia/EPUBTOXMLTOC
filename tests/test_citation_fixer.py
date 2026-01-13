@@ -25,7 +25,8 @@ class TestCitationFixer(unittest.TestCase):
         fixed, changes = self.fixer.fix_citations_in_content(content)
         
         self.assertEqual(len(changes), 1)
-        self.assertIn('<ulink url="ch0011#ch0011-c1-bib-0001">1</ulink>', fixed)
+        # Citation ID is normalized: ch0011-c1-bib-0001 -> ch0011-bib0001
+        self.assertIn('<ulink url="ch0011#ch0011-bib0001">1</ulink>', fixed)
         self.assertNotIn('<citation>', fixed)
     
     def test_multiple_citations(self):

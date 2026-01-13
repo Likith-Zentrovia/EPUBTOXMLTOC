@@ -67,11 +67,20 @@ class CitationFixer:
             # Parse the citation ID
             chapter, bib_num = self._parse_citation_id(citation_id, default_chapter)
             
-            # Create the ulink
-            if chapter:
-                url = f"{chapter}#{ citation_id}"
+            # Create normalized reference ID (matching bibliography format)
+            # ch0011-c1-bib-0001 -> ch0011-bib0001
+            if chapter and bib_num:
+                normalized_ref_id = f"{chapter}-bib{int(bib_num):04d}"
+            elif bib_num:
+                normalized_ref_id = f"bib{int(bib_num):04d}"
             else:
-                url = f"#{citation_id}"
+                normalized_ref_id = citation_id
+            
+            # Create the ulink with normalized reference ID
+            if chapter:
+                url = f"{chapter}#{normalized_ref_id}"
+            else:
+                url = f"#{normalized_ref_id}"
             
             # Display number (strip leading zeros for display)
             display_num = str(int(bib_num)) if bib_num and bib_num.isdigit() else bib_num or citation_id
@@ -82,6 +91,7 @@ class CitationFixer:
                 'original': original,
                 'replacement': replacement,
                 'citation_id': citation_id,
+                'normalized_ref_id': normalized_ref_id,
                 'chapter': chapter,
                 'bib_num': bib_num
             })
