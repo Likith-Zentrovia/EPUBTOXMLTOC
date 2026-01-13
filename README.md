@@ -1,16 +1,19 @@
-# EPUBTOXMLTOC - TOC XML Fixer
+# EPUBTOXMLTOC - Book XML Fixer
 
-A Python tool to fix nesting and link issues in Table of Contents (TOC) XML files, commonly found in EPUB ebooks.
+A Python tool to fix TOC nesting, link issues, and citation tags in EPUB/book XML files.
 
 ## Features
 
-- **Fix Nesting Issues**: Automatically restructure flat TOC entries into proper hierarchical structure (chapters → sections → subsections)
+- **Fix TOC Nesting Issues**: Automatically restructure flat TOC entries into proper hierarchical structure (chapters → sections → subsections)
 - **Fix Link Issues**: Correct broken links, URL encoding problems, and invalid fragment identifiers
+- **Fix Citation Tags**: Convert `<citation>` tags to proper `<ulink>` format with working links
+- **Process Entire Books**: Process zip files containing complete book structures
 - **Multiple Format Support**:
   - EPUB 2 NCX (Navigation Control for XML)
   - EPUB 3 Navigation Document (XHTML)
   - Generic TOC XML structures
-- **Analysis Mode**: Analyze TOC files and get detailed reports of issues without modifying
+  - Content XML files with citations
+- **Analysis Mode**: Analyze files and get detailed reports without modifying
 - **Command-line Interface**: Easy-to-use CLI for quick fixes
 
 ## Installation
@@ -85,6 +88,37 @@ python fix_toc.py "C:\Users\user\Documents\book\toc.xml" -o "C:\Users\user\Docum
 python fix_toc.py "C:\path\to\toc.xml" --analyze -v
 ```
 
+### Process Entire Book (ZIP file)
+
+Use `fix_book.py` to process an entire book zip file:
+
+```bash
+# Fix all issues in a book zip file
+python fix_book.py book.zip -o book_fixed.zip
+
+# Analyze a book without modifying
+python fix_book.py book.zip --analyze
+
+# Fix only TOC (skip citations)
+python fix_book.py book.zip -o fixed.zip --no-citations
+
+# Fix only citations (skip TOC)
+python fix_book.py book.zip -o fixed.zip --no-toc
+
+# Process a directory instead of zip
+python fix_book.py ./book_folder/ -o ./book_fixed/
+```
+
+### Windows Examples (Book Processing)
+
+```powershell
+# Process a book zip file
+python fix_book.py "C:\Users\user\Documents\Jan13\9781394266074.zip" -o "C:\Users\user\Documents\Jan13\9781394266074_fixed.zip"
+
+# Analyze first to see what will be fixed
+python fix_book.py "C:\Users\user\Documents\Jan13\9781394266074.zip" --analyze
+```
+
 ### Python API Usage
 
 ```python
@@ -156,6 +190,32 @@ The tool detects and fixes improper nesting based on title patterns:
 - Cover, Title Page, Copyright
 - Preface, Foreword, Introduction
 - Appendix, Glossary, Bibliography, Index
+
+### Citation Issues
+
+The tool converts `<citation>` tags to proper `<ulink>` format:
+
+**Before:**
+```xml
+<para>
+  The effective provision of AHPC improves animal QOL
+  <citation>ch0011-c1-bib-0001</citation>.
+  See also <ulink url="ch0020">Chapter 9</ulink>.
+</para>
+```
+
+**After:**
+```xml
+<para>
+  The effective provision of AHPC improves animal QOL
+  <ulink url="ch0011#ch0011-c1-bib-0001">1</ulink>.
+  See also <ulink url="ch0020">Chapter 9</ulink>.
+</para>
+```
+
+The citation ID `ch0011-c1-bib-0001` is parsed to:
+- Chapter: `ch0011` (used for URL)
+- Reference number: `1` (displayed text, from `0001`)
 
 ### Link Issues
 
